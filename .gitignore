@@ -1,0 +1,34 @@
+# Бинарные файлы
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+app
+
+# Тестовые бинарные файлы
+*.test
+
+# Файлы покрытия кода
+*.out
+*.prof
+
+# Зависимости
+/vendor/
+
+# Файлы IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Данные MongoDB
+/data/
+
+# Файлы логов
+*.log
+
+# Файлы окружения
+.env
+.env.local 

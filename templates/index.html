@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Умножение чисел</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .form-container {
+            margin-bottom: 30px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        
+        /* Стили для сортируемых заголовков */
+        th.sortable {
+            cursor: pointer;
+            position: relative;
+            padding-right: 20px;
+        }
+        
+        th.sortable:hover {
+            background-color: #e6e6e6;
+        }
+        
+        th.sortable::after {
+            content: '\2195'; /* Unicode символ двунаправленной стрелки */
+            position: absolute;
+            right: 5px;
+            color: #999;
+        }
+        
+        th.sortable.asc::after {
+            content: '\2191'; /* Unicode символ стрелки вверх */
+            color: #333;
+        }
+        
+        th.sortable.desc::after {
+            content: '\2193'; /* Unicode символ стрелки вниз */
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <h1>Умножение чисел</h1>
+    
+    <div class="form-container">
+        <form id="multiplyForm" action="/multiply" method="POST">
+            <div class="input-group">
+                <label for="number1">Первое число:</label>
+                <input type="number" id="number1" name="number1" required step="any">
+            </div>
+            <div class="input-group">
+                <label for="number2">Второе число:</label>
+                <input type="number" id="number2" name="number2" required step="any">
+            </div>
+            <button type="submit">Умножить</button>
+        </form>
+    </div>
+    
+    <h2>История результатов</h2>
+    <table id="resultsTable">
+        <thead>
+            <tr>
+                <th class="sortable" data-column="0" data-type="number">Первое число</th>
+                <th class="sortable" data-column="1" data-type="number">Второе число</th>
+                <th class="sortable" data-column="2" data-type="number">Результат</th>
+                <th class="sortable" data-column="3" data-type="date">Дата</th>
+            </tr>
+        </thead>
+        <tbody>
+            {{range .Results}}
+            <tr>
+                <td>{{.Number1}}</td>
+                <td>{{.Number2}}</td>
+                <td>{{.Product}}</td>
+                <td>{{.CreatedAt.Format "02.01.2006 15:04:05"}}</td>
+            </tr>
+            {{end}}
+        </tbody>
+    </table>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Получаем все сортируемые заголовки
+            const sortableHeaders = document.querySelectorAll('th.sortable');
+            
+            // Добавляем обработчик события для каждого заголовка
+            sortableHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const column = parseInt(this.dataset.column);
+                    const type = this.dataset.type;
+                    
+                    // Определяем направление сортировки
+                    let direction = 'asc';
+                    if (this.classList.contains('asc')) {
+                        direction = 'desc';
+                    }
+                    
+                    // Сбрасываем классы сортировки для всех заголовков
+                    sortableHeaders.forEach(h => {
+                        h.classList.remove('asc', 'desc');
+                    });
+                    
+                    // Устанавливаем класс для текущего заголовка
+                    this.classList.add(direction);
+                    
+                    // Сортируем таблицу
+                    sortTable(column, direction, type);
+                });
+            });
+            
+            // Функция для сортировки таблицы
+            function sortTable(column, direction, type) {
+                const table = document.getElementById('resultsTable');
+                const tbody = table.querySelector('tbody');
+                const rows = Array.from(tbody.querySelectorAll('tr'));
+                
+                // Сортируем строки
+                rows.sort((a, b) => {
+                    const cellA = a.cells[column].textContent.trim();
+                    const cellB = b.cells[column].textContent.trim();
+                    
+                    return compareValues(cellA, cellB, type, direction);
+                });
+                
+                // Очищаем таблицу и добавляем отсортированные строки
+                while (tbody.firstChild) {
+                    tbody.removeChild(tbody.firstChild);
+                }
+                
+                rows.forEach(row => {
+                    tbody.appendChild(row);
+                });
+            }
+            
+            // Функция для сравнения значений с учетом типа данных
+            function compareValues(a, b, type, direction) {
+                let comparison = 0;
+                
+                if (type === 'number') {
+                    // Преобразуем строки в числа для сравнения
+                    const numA = parseFloat(a) || 0;
+                    const numB = parseFloat(b) || 0;
+                    comparison = numA - numB;
+                } else if (type === 'date') {
+                    // Преобразуем строки дат в объекты Date для сравнения
+                    const dateA = parseDate(a);
+                    const dateB = parseDate(b);
+                    comparison = dateA - dateB;
+                } else {
+                    // Сравниваем строки
+                    comparison = a.localeCompare(b);
+                }
+                
+                // Инвертируем результат для сортировки по убыванию
+                return direction === 'desc' ? -comparison : comparison;
+            }
+            
+            // Функция для преобразования строки даты в объект Date
+            function parseDate(dateStr) {
+                // Формат даты: DD.MM.YYYY HH:MM:SS
+                const parts = dateStr.split(' ');
+                const dateParts = parts[0].split('.');
+                const timeParts = parts[1].split(':');
+                
+                // Создаем объект Date (месяцы в JavaScript начинаются с 0)
+                return new Date(
+                    parseInt(dateParts[2]), // год
+                    parseInt(dateParts[1]) - 1, // месяц
+                    parseInt(dateParts[0]), // день
+                    parseInt(timeParts[0]), // часы
+                    parseInt(timeParts[1]), // минуты
+                    parseInt(timeParts[2])  // секунды
+                );
+            }
+        });
+    </script>
+</body>
+</html> 
