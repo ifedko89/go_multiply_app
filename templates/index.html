@@ -1,104 +1,203 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Умножение чисел</title>
+    <title>Математические операции</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=SF+Pro+Display:wght@300;400;500&family=SF+Pro+Text:wght@300;400;500&display=swap">
     <style>
+        :root {
+            --apple-bg: #ffffff;
+            --apple-text: #1d1d1f;
+            --apple-accent: #0071e3;
+            --apple-accent-light: #0071e320;
+            --apple-gray: #f5f5f7;
+            --apple-border: #d2d2d7;
+            --apple-success: #34c759;
+            --apple-error: #ff3b30;
+        }
+        
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
             max-width: 800px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 40px 20px;
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
+            line-height: 1.5;
+            font-weight: 300;
         }
-        h1 {
-            color: #333;
+        
+        h1, h2 {
+            color: var(--apple-text);
             text-align: center;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            font-weight: 400;
         }
+        
+        h1 {
+            font-size: 32px;
+            margin-bottom: 40px;
+        }
+        
+        h2 {
+            font-size: 24px;
+            margin: 40px 0 20px;
+        }
+        
         .form-container {
-            margin-bottom: 30px;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            background-color: #f9f9f9;
+            margin-bottom: 40px;
+            padding: 30px;
+            border-radius: 12px;
+            background-color: var(--apple-gray);
         }
+        
         .input-group {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
         }
+        
         label {
             display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            margin-bottom: 8px;
+            font-weight: 400;
+            color: var(--apple-text);
         }
-        input[type="number"] {
+        
+        input[type="number"], select {
             width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
+            padding: 12px;
+            border: 1px solid var(--apple-border);
+            border-radius: 8px;
             box-sizing: border-box;
+            background-color: var(--apple-bg);
+            color: var(--apple-text);
+            font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            font-size: 16px;
+            font-weight: 300;
+            -webkit-appearance: none;
+            appearance: none;
         }
+        
+        input[type="number"]:focus, select:focus {
+            outline: none;
+            border-color: var(--apple-accent);
+            box-shadow: 0 0 0 2px var(--apple-accent-light);
+        }
+        
+        .operation-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+        
         button {
-            background-color: #4CAF50;
+            background-color: var(--apple-accent);
             color: white;
-            padding: 10px 15px;
+            padding: 12px 20px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
             font-size: 16px;
+            font-family: 'SF Pro Text', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
+            font-weight: 400;
+            flex: 1;
+            transition: all 0.2s ease;
         }
+        
         button:hover {
-            background-color: #45a049;
+            background-color: #0062c4;
         }
+        
+        button:disabled {
+            background-color: var(--apple-border);
+            color: #86868b;
+            cursor: not-allowed;
+        }
+        
         table {
             width: 100%;
             border-collapse: collapse;
+            margin-top: 20px;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px var(--apple-border);
         }
+        
         th, td {
-            border: 1px solid #ddd;
-            padding: 8px;
+            padding: 14px 16px;
             text-align: left;
         }
+        
         th {
-            background-color: #f2f2f2;
+            background-color: var(--apple-gray);
+            color: var(--apple-text);
+            font-weight: 500;
+            border-bottom: 1px solid var(--apple-border);
         }
-        tr:nth-child(even) {
-            background-color: #f9f9f9;
+        
+        tr:not(:last-child) td {
+            border-bottom: 1px solid var(--apple-border);
         }
         
         /* Стили для сортируемых заголовков */
         th.sortable {
             cursor: pointer;
             position: relative;
-            padding-right: 20px;
+            padding-right: 24px;
         }
         
         th.sortable:hover {
-            background-color: #e6e6e6;
+            color: var(--apple-accent);
         }
         
         th.sortable::after {
-            content: '\2195'; /* Unicode символ двунаправленной стрелки */
+            content: '↕';
             position: absolute;
-            right: 5px;
-            color: #999;
+            right: 10px;
+            color: #86868b;
+            font-size: 14px;
         }
         
         th.sortable.asc::after {
-            content: '\2191'; /* Unicode символ стрелки вверх */
-            color: #333;
+            content: '↑';
+            color: var(--apple-accent);
         }
         
         th.sortable.desc::after {
-            content: '\2193'; /* Unicode символ стрелки вниз */
-            color: #333;
+            content: '↓';
+            color: var(--apple-accent);
+        }
+        
+        .filter-container {
+            margin: 20px 0;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        
+        select {
+            cursor: pointer;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 10px center;
+            padding-right: 30px;
+        }
+        
+        .operation-multiply,
+        .operation-divide,
+        .operation-add,
+        .operation-subtract,
+        .operation-square {
+            color: var(--apple-text);
         }
     </style>
 </head>
 <body>
-    <h1>Умножение чисел</h1>
+    <h1>Математические операции</h1>
     
     <div class="form-container">
-        <form id="multiplyForm" action="/multiply" method="POST">
+        <form id="operationForm" action="/multiply" method="POST">
             <div class="input-group">
                 <label for="number1">Первое число:</label>
                 <input type="number" id="number1" name="number1" required step="any">
@@ -107,26 +206,61 @@
                 <label for="number2">Второе число:</label>
                 <input type="number" id="number2" name="number2" required step="any">
             </div>
-            <button type="submit">Умножить</button>
+            <div class="operation-buttons">
+                <button type="button" id="addBtn" onclick="submitForm('add')" disabled>Сложить</button>
+                <button type="button" id="subtractBtn" onclick="submitForm('subtract')" disabled>Вычесть</button>
+                <button type="button" id="multiplyBtn" onclick="submitForm('multiply')" disabled>Умножить</button>
+                <button type="button" id="divideBtn" onclick="submitForm('divide')" disabled>Разделить</button>
+                <button type="button" id="squareBtn" onclick="submitForm('square')" disabled>Квадрат</button>
+            </div>
         </form>
     </div>
     
     <h2>История результатов</h2>
+    
+    <div class="filter-container">
+        <label for="operationFilter">Фильтр по операции:</label>
+        <select id="operationFilter">
+            <option value="all">Все операции</option>
+            <option value="add">Только сложение</option>
+            <option value="subtract">Только вычитание</option>
+            <option value="multiply">Только умножение</option>
+            <option value="divide">Только деление</option>
+            <option value="square">Только возведение в квадрат</option>
+        </select>
+    </div>
+    
     <table id="resultsTable">
         <thead>
             <tr>
                 <th class="sortable" data-column="0" data-type="number">Первое число</th>
                 <th class="sortable" data-column="1" data-type="number">Второе число</th>
                 <th class="sortable" data-column="2" data-type="number">Результат</th>
-                <th class="sortable" data-column="3" data-type="date">Дата</th>
+                <th class="sortable" data-column="3" data-type="text">Операция</th>
+                <th class="sortable" data-column="4" data-type="date">Дата</th>
             </tr>
         </thead>
         <tbody>
             {{range .Results}}
-            <tr>
+            <tr data-operation="{{.Operation}}">
                 <td>{{.Number1}}</td>
                 <td>{{.Number2}}</td>
-                <td>{{.Product}}</td>
+                <td>{{.Result}}</td>
+                <td class="operation-{{.Operation}}">
+                    {{if eq .Operation "multiply"}}
+                        Умножение
+                    {{else if eq .Operation "divide"}}
+                        Деление
+                    {{else if eq .Operation "add"}}
+                        Сложение
+                    {{else if eq .Operation "subtract"}}
+                        Вычитание
+                    {{else if eq .Operation "square"}}
+                        Возведение в квадрат
+                    {{else}}
+                        {{.Operation}}
+                    {{end}}
+                </td>
                 <td>{{.CreatedAt.Format "02.01.2006 15:04:05"}}</td>
             </tr>
             {{end}}
@@ -135,6 +269,84 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Получаем ссылки на элементы формы
+            const number1Input = document.getElementById('number1');
+            const number2Input = document.getElementById('number2');
+            const addBtn = document.getElementById('addBtn');
+            const subtractBtn = document.getElementById('subtractBtn');
+            const multiplyBtn = document.getElementById('multiplyBtn');
+            const divideBtn = document.getElementById('divideBtn');
+            const squareBtn = document.getElementById('squareBtn');
+            
+            // Функция для проверки валидности полей и управления кнопками
+            function validateInputs() {
+                const number1Valid = number1Input.value.trim() !== '';
+                const number2Valid = number2Input.value.trim() !== '';
+                
+                // Для всех операций кроме возведения в квадрат нужны оба числа
+                const bothValid = number1Valid && number2Valid;
+                
+                addBtn.disabled = !bothValid;
+                subtractBtn.disabled = !bothValid;
+                multiplyBtn.disabled = !bothValid;
+                divideBtn.disabled = !bothValid;
+                
+                // Для возведения в квадрат нужно только первое число
+                squareBtn.disabled = !number1Valid;
+            }
+            
+            // Добавляем обработчики событий для полей ввода
+            number1Input.addEventListener('input', validateInputs);
+            number2Input.addEventListener('input', validateInputs);
+            
+            // Проверяем состояние полей при загрузке страницы
+            validateInputs();
+            
+            // Форма для отправки операций
+            function submitForm(operation) {
+                const form = document.getElementById('operationForm');
+                if (operation === 'multiply') {
+                    form.action = '/multiply';
+                } else if (operation === 'divide') {
+                    form.action = '/divide';
+                } else if (operation === 'add') {
+                    form.action = '/add';
+                } else if (operation === 'subtract') {
+                    form.action = '/subtract';
+                } else if (operation === 'square') {
+                    form.action = '/square';
+                    // Для возведения в квадрат второе число не требуется
+                    const number2Input = document.getElementById('number2');
+                    if (number2Input.hasAttribute('required')) {
+                        number2Input.removeAttribute('required');
+                    }
+                    form.submit();
+                    // Возвращаем required атрибут обратно
+                    number2Input.setAttribute('required', '');
+                    return;
+                }
+                form.submit();
+            }
+            window.submitForm = submitForm;
+            
+            // Фильтрация результатов
+            const operationFilter = document.getElementById('operationFilter');
+            operationFilter.addEventListener('change', filterResults);
+            
+            function filterResults() {
+                const filter = operationFilter.value;
+                const rows = document.querySelectorAll('#resultsTable tbody tr');
+                
+                rows.forEach(row => {
+                    const operation = row.getAttribute('data-operation');
+                    if (filter === 'all' || operation === filter) {
+                        row.style.display = '';
+                    } else {
+                        row.style.display = 'none';
+                    }
+                });
+            }
+            
             // Получаем все сортируемые заголовки
             const sortableHeaders = document.querySelectorAll('th.sortable');
             
