@@ -9,7 +9,7 @@ import (
 	"strconv"
 	"strings"
 	"testing"
-	"time"
+	"time"3434343434
 
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -158,6 +158,77 @@ func setupTestRouter(client *mongo.Client) *gin.Engine {
 			"number2":    number2,
 			"result":     product,
 			"operation":  "multiply",
+			"created_at": time.Now(),
+		}
+
+		// Сохраняем результат в MongoDB
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+
+		_, err = collection.InsertOne(ctx, result)
+		if err != nil {
+			// Для тестов возвращаем JSON вместо HTML
+			if gin.Mode() == gin.TestMode {
+				c.JSON(http.StatusInternalServerError, gin.H{
+					"error": "Ошибка при сохранении результата: " + err.Error(),
+				})
+				return
+			}
+			c.HTML(http.StatusInternalServerError, "index.html", gin.H{
+				"Error": "Ошибка при сохранении результата: " + err.Error(),
+			})
+			return
+		}
+
+		// Перенаправляем на главную страницу
+		c.Redirect(http.StatusSeeOther, "/")
+	})
+
+	router.POST("/subtract", func(c *gin.Context) {
+		// Получаем данные из формы
+		number1Str := c.PostForm("number1")
+		number2Str := c.PostForm("number2")
+
+		// Преобразуем строки в числа
+		number1, err := strconv.ParseFloat(number1Str, 64)
+		if err != nil {
+			// Для тестов возвращаем JSON вместо HTML
+			if gin.Mode() == gin.TestMode {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"error": "Неверный формат первого числа",
+				})
+				return
+			}
+			c.HTML(http.StatusBadRequest, "index.html", gin.H{
+				"Error": "Неверный формат первого числа",
+			})
+			return
+		}
+
+		number2, err := strconv.ParseFloat(number2Str, 64)
+		if err != nil {
+			// Для тестов возвращаем JSON вместо HTML
+			if gin.Mode() == gin.TestMode {
+				c.JSON(http.StatusBadRequest, gin.H{
+					"error": "Неверный формат второго числа",
+				})
+				return
+			}
+			c.HTML(http.StatusBadRequest, "index.html", gin.H{
+				"Error": "Неверный формат второго числа",
+			})
+			return
+		}
+
+		// Вычисляем разность
+		difference := number1 - number2
+
+		// Создаем новый результат
+		result := bson.M{
+			"number1":    number1,
+			"number2":    number2,
+			"result":     difference,
+			"operation":  "subtract",
 			"created_at": time.Now(),
 		}
 
@@ -433,6 +504,38 @@ func (s *APITestSuite) TestInvalidInput2() {
 	var response map[string]interface{}
 	assert.NoError(s.T(), json.Unmarshal(w.Body.Bytes(), &response))
 	assert.Equal(s.T(), "Неверный формат второго числа", response["error"])
+}
+
+// TestDiff - тестирует эндпоинт вычитания
+func (s *APITestSuite) TestDiff() {
+	// Создаем данные формы с некорректным значением
+	form := url.Values{}
+	form.Add("number1", "12")
+	form.Add("number2", "4")
+	// Создаем тестовый HTTP-запрос
+	req := httptest.NewRequest(http.MethodPost, "/subtract", strings.NewReader(form.Encode()))
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+
+	// Создаем ResponseRecorder для записи ответа
+	w := httptest.NewRecorder()
+
+	// Выполняем запрос
+	s.app.ServeHTTP(w, req)
+
+	// Проверяем статус ответа (должен быть редирект)
+	assert.Equal(s.T(), http.StatusSeeOther, w.Code)
+
+	// Проверяем, что запись добавлена в базу данных
+	ctx := context.Background()
+	var result bson.M
+
+	err := s.mongoClient.Database("multiply_app").Collection("results").FindOne(
+		ctx,
+		bson.M{"number1": 12, "number2": 4, "operation": "subtract"},
+	).Decode(&result)
+
+	assert.NoError(s.T(), err)
+	assert.Equal(s.T(), float64(8), result["result"])
 }
 
 // TestAPITestSuite запускает все тесты в наборе
