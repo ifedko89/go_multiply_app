@@ -50,6 +50,9 @@ func NewMongoEnv(t *testing.T) *TestEnv {
 
 	collection := client.Database("testdb").Collection("users")
 
+	err = ApplyMigrations(ctx, client.Database("testdb"))
+	require.NoError(t, err)
+
 	return &TestEnv{
 		T:          t,
 		Container:  container,
